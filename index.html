@@ -1,46 +1,60 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Para Ti 💖</title>
+<body>
+
+<div id="msg">Te pienso más de lo que debería 💖</div>
+
+<button id="btn">¿Quieres saber por qué?</button>
+
+<canvas id="c"></canvas>
+
+<audio id="music" autoplay loop>
+  <source src="music.mp3" type="audio/mpeg">
+</audio>
 
 <style>
-html,body{
-  margin:0;
-  height:100%;
-  overflow:hidden;
-  background: radial-gradient(circle at center,#120014,#000);
-  font-family: Arial, sans-serif;
+#btn{
+  position:absolute;
+  left:50%;
+  top:60%;
+  transform:translateX(-50%);
+  padding:12px 20px;
+  font-size:18px;
+  border:none;
+  border-radius:20px;
+  background:#ff4da6;
+  color:white;
+  cursor:pointer;
+  box-shadow:0 0 20px #ff4da6;
+  transition:0.3s;
 }
 
-canvas{
-  display:block;
+#btn:hover{
+  transform:translateX(-50%) scale(1.05);
 }
 
 #msg{
   position:absolute;
   width:100%;
   text-align:center;
-  top:50%;
-  transform:translateY(-50%);
+  top:40%;
   color:white;
   font-size:28px;
   font-weight:bold;
   text-shadow:0 0 20px #ff4da6;
-  pointer-events:none;
+}
+
+#finalText{
+  position:absolute;
+  width:100%;
+  text-align:center;
+  top:75%;
+  color:white;
+  font-size:22px;
+  text-shadow:0 0 15px #ff4da6;
+  display:none;
 }
 </style>
-</head>
 
-<body>
-
-<div id="msg">Te pienso más de lo que debería 💖</div>
-<canvas id="c"></canvas>
-
-<audio id="music" autoplay loop>
-  <source src="music.mp3" type="audio/mpeg">
-</audio>
+<div id="finalText">Porque desde que te vi… todo cambió 💖</div>
 
 <script>
 const canvas = document.getElementById("c");
@@ -53,41 +67,26 @@ function resize(){
 resize();
 addEventListener("resize", resize);
 
-// ❤️ imágenes
-const imagesSrc = ["foto.jpg","foto2.jpg","foto3.jpg"];
-const images = imagesSrc.map(src=>{
-  const img = new Image();
-  img.src = src;
-  return img;
-});
+// 💖 estado
+let step = 1;
 
-// ✨ partículas
-const particles = [];
-for(let i=0;i<80;i++){
-  particles.push({
-    x:Math.random()*innerWidth,
-    y:Math.random()*innerHeight,
-    r:Math.random()*2+1,
-    d:Math.random()*1+0.5
-  });
-}
+// ❤️ imagen central
+const img = new Image();
+img.src = "foto2.jpg";
 
-function drawParticles(){
-  ctx.fillStyle="rgba(255,255,255,0.6)";
-  particles.forEach(p=>{
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx.fill();
+// ✨ botón
+const btn = document.getElementById("btn");
+const msg = document.getElementById("msg");
+const finalText = document.getElementById("finalText");
 
-    p.y -= p.d;
-    if(p.y<0){
-      p.y=innerHeight;
-      p.x=Math.random()*innerWidth;
-    }
-  });
-}
+btn.onclick = () => {
+  step = 2;
+  btn.style.display = "none";
+  msg.style.display = "none";
+  finalText.style.display = "block";
+};
 
-// 💖 corazón matemático
+// 💖 corazón
 function heart(t){
   return {
     x:16*Math.pow(Math.sin(t),3),
@@ -99,65 +98,64 @@ function draw(){
   requestAnimationFrame(draw);
 
   const time = Date.now()*0.001;
-
   ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  drawParticles();
 
   const cx = canvas.width/2;
   const cy = canvas.height/2;
 
   const scale = 20 + Math.sin(time*2)*2;
 
-  // 💖 fotos dentro del corazón
-  for(let i=0;i<images.length;i++){
-    const angle = time*0.5 + i*(Math.PI*2/images.length);
-    const x = cx + Math.cos(angle)*80;
-    const y = cy + Math.sin(angle)*80;
+  // 💖 FASE 1: solo animación
+  if(step === 1){
+
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.font="bold 16px Arial";
+
+    for(let i=0;i<200;i++){
+      const t = (i/200)*Math.PI*2 + time*0.3;
+      const p = heart(t);
+
+      const x = cx + p.x*scale;
+      const y = cy + p.y*scale;
+
+      ctx.save();
+      ctx.translate(x,y);
+      ctx.rotate(t);
+
+      ctx.fillStyle="#ffb6d9";
+      ctx.shadowBlur=15;
+      ctx.shadowColor="#ff4da6";
+      ctx.fillText("I love you 💖",0,0);
+
+      ctx.restore();
+    }
+  }
+
+  // 💖 FASE 2: aparece foto en el corazón
+  if(step === 2){
+
+    const size = 140;
 
     ctx.save();
     ctx.beginPath();
-    ctx.arc(x,y,40,0,Math.PI*2);
+    ctx.arc(cx,cy,size,0,Math.PI*2);
     ctx.clip();
 
-    ctx.drawImage(images[i], x-40, y-40, 80, 80);
-
+    ctx.drawImage(img, cx-size, cy-size, size*2, size*2);
     ctx.restore();
-  }
 
-  // 💌 texto girando en forma de corazón
-  ctx.textAlign="center";
-  ctx.textBaseline="middle";
-  ctx.font="bold 16px Arial";
-
-  for(let i=0;i<260;i++){
-    const t = (i/260)*Math.PI*2 + time*0.3;
-    const p = heart(t);
-
-    const x = cx + p.x*scale;
-    const y = cy + p.y*scale;
-
-    ctx.save();
-    ctx.translate(x,y);
-    ctx.rotate(t);
-
-    ctx.shadowBlur=15;
+    // borde glow
+    ctx.beginPath();
+    ctx.arc(cx,cy,size,0,Math.PI*2);
+    ctx.strokeStyle="#ff4da6";
+    ctx.shadowBlur=20;
     ctx.shadowColor="#ff4da6";
-
-    ctx.fillStyle="#ffb6d9";
-    ctx.fillText("I love you 💖",0,0);
-
-    ctx.restore();
+    ctx.stroke();
   }
-});
+}
 
 draw();
-
-// 🔊 música (intento autoplay)
-window.addEventListener("click",()=>{
-  document.getElementById("music").play();
-});
 </script>
 
 </body>
-</html>
