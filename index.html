@@ -1,114 +1,93 @@
-<body>
-
-<div id="msg">Te pienso más de lo que debería 💖</div>
-
-<button id="btn">¿Quieres saber por qué?</button>
-
-<canvas id="c"></canvas>
-
-<audio id="music" loop>
-  <source src="music.mp3" type="audio/mpeg">
-</audio>
-
-<div id="finalText">Porque desde que te vi… todo cambió 💖</div>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Para Ti 💖</title>
 
 <style>
 html,body{
   margin:0;
   height:100%;
   overflow:hidden;
-  background:#000; /* 🖤 negro total */
+  background: radial-gradient(circle at center,#120014,#000);
   font-family: Arial, sans-serif;
 }
 
-/* 🖤 CANVAS FULL NEGRO */
 canvas{
-  position:absolute;
-  top:0;
-  left:0;
+  display:block;
 }
 
-/* 💖 TEXTO PERFECTAMENTE CENTRADO */
 #msg{
   position:absolute;
   width:100%;
   text-align:center;
   top:50%;
-  transform:translateY(-120%);
+  transform:translateY(-50%);
   color:white;
   font-size:28px;
   font-weight:bold;
   text-shadow:0 0 20px #ff4da6;
-}
-
-/* 💖 BOTÓN CENTRADO REAL */
-#btn{
-  position:absolute;
-  left:50%;
-  top:55%;
-  transform:translateX(-50%);
-  padding:12px 20px;
-  font-size:18px;
-  border:none;
-  border-radius:20px;
-  background:#ff4da6;
-  color:white;
-  cursor:pointer;
-  box-shadow:0 0 20px #ff4da6;
-}
-
-/* 💖 TEXTO FINAL CENTRADO PERFECTO */
-#finalText{
-  position:absolute;
-  width:100%;
-  text-align:center;
-  top:50%;
-  transform:translateY(120%);
-  color:white;
-  font-size:22px;
-  text-shadow:0 0 15px #ff4da6;
-  display:none;
+  pointer-events:none;
 }
 </style>
+</head>
+
+<body>
+
+<div id="msg">Te pienso más de lo que debería 💖</div>
+<canvas id="c"></canvas>
+
+<audio id="music" autoplay loop>
+  <source src="music.mp3" type="audio/mpeg">
+</audio>
 
 <script>
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 
-let W,H;
-
 function resize(){
-  W = innerWidth;
-  H = innerHeight;
-  canvas.width = W;
-  canvas.height = H;
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
 }
 resize();
 addEventListener("resize", resize);
 
-// 💖 imagen
-const img = new Image();
-img.src = "foto2.jpg";
+// ❤️ imágenes
+const imagesSrc = ["foto.jpg","foto2.jpg","foto3.jpg"];
+const images = imagesSrc.map(src=>{
+  const img = new Image();
+  img.src = src;
+  return img;
+});
 
-// 💖 estado
-let step = 1;
+// ✨ partículas
+const particles = [];
+for(let i=0;i<80;i++){
+  particles.push({
+    x:Math.random()*innerWidth,
+    y:Math.random()*innerHeight,
+    r:Math.random()*2+1,
+    d:Math.random()*1+0.5
+  });
+}
 
-// UI
-const btn = document.getElementById("btn");
-const msg = document.getElementById("msg");
-const finalText = document.getElementById("finalText");
-const music = document.querySelector("audio");
+function drawParticles(){
+  ctx.fillStyle="rgba(255,255,255,0.6)";
+  particles.forEach(p=>{
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fill();
 
-btn.onclick = () => {
-  music.play();
-  step = 2;
+    p.y -= p.d;
+    if(p.y<0){
+      p.y=innerHeight;
+      p.x=Math.random()*innerWidth;
+    }
+  });
+}
 
-  btn.style.display = "none";
-  msg.style.display = "none";
-  finalText.style.display = "block";
-};
-
-// 💖 corazón
+// 💖 corazón matemático
 function heart(t){
   return {
     x:16*Math.pow(Math.sin(t),3),
@@ -119,66 +98,66 @@ function heart(t){
 function draw(){
   requestAnimationFrame(draw);
 
-  // 🖤 fondo negro real (OBLIGATORIO para consistencia)
-  ctx.fillStyle = "#000";
-  ctx.fillRect(0,0,W,H);
+  const time = Date.now()*0.001;
 
-  const cx = W/2;
-  const cy = H/2;
-  const time = performance.now()*0.001;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  const scale = Math.min(W,H)/28;
+  drawParticles();
 
-  // 💖 ESCENA 1
-  if(step === 1){
+  const cx = canvas.width/2;
+  const cy = canvas.height/2;
 
-    ctx.textAlign="center";
-    ctx.textBaseline="middle";
-    ctx.font="bold 14px Arial";
+  const scale = 20 + Math.sin(time*2)*2;
 
-    for(let i=0;i<160;i++){
-      const t = (i/160)*Math.PI*2 + time*0.3;
-      const p = heart(t);
-
-      const x = cx + p.x*scale;
-      const y = cy + p.y*scale;
-
-      ctx.save();
-      ctx.translate(x,y);
-
-      ctx.fillStyle="#ffb6d9";
-      ctx.shadowBlur=15;
-      ctx.shadowColor="#ff4da6";
-
-      ctx.fillText("I love you 💖",0,0);
-
-      ctx.restore();
-    }
-  }
-
-  // 💖 ESCENA 2
-  if(step === 2){
-
-    const size = Math.min(W,H)*0.2;
+  // 💖 fotos dentro del corazón
+  for(let i=0;i<images.length;i++){
+    const angle = time*0.5 + i*(Math.PI*2/images.length);
+    const x = cx + Math.cos(angle)*80;
+    const y = cy + Math.sin(angle)*80;
 
     ctx.save();
     ctx.beginPath();
-    ctx.arc(cx,cy,size,0,Math.PI*2);
+    ctx.arc(x,y,40,0,Math.PI*2);
     ctx.clip();
 
-    ctx.drawImage(img,cx-size,cy-size,size*2,size*2);
-    ctx.restore();
+    ctx.drawImage(images[i], x-40, y-40, 80, 80);
 
-    ctx.beginPath();
-    ctx.arc(cx,cy,size,0,Math.PI*2);
-    ctx.strokeStyle="#ff4da6";
-    ctx.shadowBlur=25;
-    ctx.shadowColor="#ff4da6";
-    ctx.stroke();
+    ctx.restore();
   }
-}
+
+  // 💌 texto girando en forma de corazón
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
+  ctx.font="bold 16px Arial";
+
+  for(let i=0;i<260;i++){
+    const t = (i/260)*Math.PI*2 + time*0.3;
+    const p = heart(t);
+
+    const x = cx + p.x*scale;
+    const y = cy + p.y*scale;
+
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(t);
+
+    ctx.shadowBlur=15;
+    ctx.shadowColor="#ff4da6";
+
+    ctx.fillStyle="#ffb6d9";
+    ctx.fillText("I love you 💖",0,0);
+
+    ctx.restore();
+  }
+});
 
 draw();
+
+// 🔊 música (intento autoplay)
+window.addEventListener("click",()=>{
+  document.getElementById("music").play();
+});
 </script>
 
 </body>
+</html>
