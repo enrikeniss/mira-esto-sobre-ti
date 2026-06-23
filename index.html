@@ -6,15 +6,46 @@
 
 <canvas id="c"></canvas>
 
-<audio id="music" autoplay loop>
+<audio id="music" loop>
   <source src="music.mp3" type="audio/mpeg">
 </audio>
 
+<div id="finalText">Porque desde que te vi… todo cambió 💖</div>
+
 <style>
+html,body{
+  margin:0;
+  height:100%;
+  overflow:hidden;
+  background:#000; /* 🖤 negro total */
+  font-family: Arial, sans-serif;
+}
+
+/* 🖤 CANVAS FULL NEGRO */
+canvas{
+  position:absolute;
+  top:0;
+  left:0;
+}
+
+/* 💖 TEXTO PERFECTAMENTE CENTRADO */
+#msg{
+  position:absolute;
+  width:100%;
+  text-align:center;
+  top:50%;
+  transform:translateY(-120%);
+  color:white;
+  font-size:28px;
+  font-weight:bold;
+  text-shadow:0 0 20px #ff4da6;
+}
+
+/* 💖 BOTÓN CENTRADO REAL */
 #btn{
   position:absolute;
   left:50%;
-  top:60%;
+  top:55%;
   transform:translateX(-50%);
   padding:12px 20px;
   font-size:18px;
@@ -24,29 +55,15 @@
   color:white;
   cursor:pointer;
   box-shadow:0 0 20px #ff4da6;
-  transition:0.3s;
 }
 
-#btn:hover{
-  transform:translateX(-50%) scale(1.05);
-}
-
-#msg{
-  position:absolute;
-  width:100%;
-  text-align:center;
-  top:40%;
-  color:white;
-  font-size:28px;
-  font-weight:bold;
-  text-shadow:0 0 20px #ff4da6;
-}
-
+/* 💖 TEXTO FINAL CENTRADO PERFECTO */
 #finalText{
   position:absolute;
   width:100%;
   text-align:center;
-  top:75%;
+  top:50%;
+  transform:translateY(120%);
   color:white;
   font-size:22px;
   text-shadow:0 0 15px #ff4da6;
@@ -54,33 +71,38 @@
 }
 </style>
 
-<div id="finalText">Porque desde que te vi… todo cambió 💖</div>
-
 <script>
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 
+let W,H;
+
 function resize(){
-  canvas.width = innerWidth;
-  canvas.height = innerHeight;
+  W = innerWidth;
+  H = innerHeight;
+  canvas.width = W;
+  canvas.height = H;
 }
 resize();
 addEventListener("resize", resize);
 
-// 💖 estado
-let step = 1;
-
-// ❤️ imagen central
+// 💖 imagen
 const img = new Image();
 img.src = "foto2.jpg";
 
-// ✨ botón
+// 💖 estado
+let step = 1;
+
+// UI
 const btn = document.getElementById("btn");
 const msg = document.getElementById("msg");
 const finalText = document.getElementById("finalText");
+const music = document.querySelector("audio");
 
 btn.onclick = () => {
+  music.play();
   step = 2;
+
   btn.style.display = "none";
   msg.style.display = "none";
   finalText.style.display = "block";
@@ -97,23 +119,25 @@ function heart(t){
 function draw(){
   requestAnimationFrame(draw);
 
-  const time = Date.now()*0.001;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // 🖤 fondo negro real (OBLIGATORIO para consistencia)
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0,0,W,H);
 
-  const cx = canvas.width/2;
-  const cy = canvas.height/2;
+  const cx = W/2;
+  const cy = H/2;
+  const time = performance.now()*0.001;
 
-  const scale = 20 + Math.sin(time*2)*2;
+  const scale = Math.min(W,H)/28;
 
-  // 💖 FASE 1: solo animación
+  // 💖 ESCENA 1
   if(step === 1){
 
     ctx.textAlign="center";
     ctx.textBaseline="middle";
-    ctx.font="bold 16px Arial";
+    ctx.font="bold 14px Arial";
 
-    for(let i=0;i<200;i++){
-      const t = (i/200)*Math.PI*2 + time*0.3;
+    for(let i=0;i<160;i++){
+      const t = (i/160)*Math.PI*2 + time*0.3;
       const p = heart(t);
 
       const x = cx + p.x*scale;
@@ -121,35 +145,34 @@ function draw(){
 
       ctx.save();
       ctx.translate(x,y);
-      ctx.rotate(t);
 
       ctx.fillStyle="#ffb6d9";
       ctx.shadowBlur=15;
       ctx.shadowColor="#ff4da6";
+
       ctx.fillText("I love you 💖",0,0);
 
       ctx.restore();
     }
   }
 
-  // 💖 FASE 2: aparece foto en el corazón
+  // 💖 ESCENA 2
   if(step === 2){
 
-    const size = 140;
+    const size = Math.min(W,H)*0.2;
 
     ctx.save();
     ctx.beginPath();
     ctx.arc(cx,cy,size,0,Math.PI*2);
     ctx.clip();
 
-    ctx.drawImage(img, cx-size, cy-size, size*2, size*2);
+    ctx.drawImage(img,cx-size,cy-size,size*2,size*2);
     ctx.restore();
 
-    // borde glow
     ctx.beginPath();
     ctx.arc(cx,cy,size,0,Math.PI*2);
     ctx.strokeStyle="#ff4da6";
-    ctx.shadowBlur=20;
+    ctx.shadowBlur=25;
     ctx.shadowColor="#ff4da6";
     ctx.stroke();
   }
