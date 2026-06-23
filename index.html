@@ -14,40 +14,41 @@ html,body{
   font-family: Arial, sans-serif;
 }
 
-/* canvas full cinematic */
+/* CANVAS */
 canvas{
   position:absolute;
   width:100%;
   height:100%;
 }
 
-/* texto inicial */
+/* TEXTO INICIAL */
 #msg{
   position:absolute;
   width:100%;
   text-align:center;
-  top:38%;
+  top:35%;
   color:white;
   font-size:6vw;
-  text-shadow:0 0 25px #ff4da6;
+  text-shadow:0 0 20px #ff4da6;
 }
 
-/* botón romántico */
+/* BOTÓN (AHORA SI SIEMPRE VISIBLE) */
 #btn{
   position:absolute;
   left:50%;
-  top:58%;
+  top:55%;
   transform:translateX(-50%);
-  padding:14px 22px;
+  padding:12px 18px;
   font-size:4.5vw;
   border:none;
   border-radius:30px;
   background:#ff4da6;
   color:white;
-  box-shadow:0 0 25px #ff4da6;
+  box-shadow:0 0 20px #ff4da6;
+  cursor:pointer;
 }
 
-/* final text */
+/* TEXTO FINAL */
 #finalText{
   position:absolute;
   width:100%;
@@ -56,7 +57,7 @@ canvas{
   color:white;
   font-size:4.5vw;
   display:none;
-  text-shadow:0 0 20px #ff4da6;
+  text-shadow:0 0 15px #ff4da6;
 }
 </style>
 </head>
@@ -88,7 +89,7 @@ function resize(){
 resize();
 addEventListener("resize", resize);
 
-// 💖 imagen central
+// 💖 imagen
 const img = new Image();
 img.src = "foto2.jpg";
 
@@ -104,17 +105,17 @@ const music = document.getElementById("music");
 btn.onclick = () => {
   music.play();
   step = 2;
-  msg.style.opacity = 0;
-  btn.style.opacity = 0;
+  msg.style.display = "none";
+  btn.style.display = "none";
   finalText.style.display = "block";
 };
 
-// 💖 partículas (aura romántica real)
-const particles = Array.from({length:60},()=>({
+// 💖 partículas suaves (ligeras)
+const particles = Array.from({length:45},()=>({
   x:Math.random()*W,
   y:Math.random()*H,
-  r:Math.random()*2+1,
-  v:Math.random()*0.5+0.2
+  v:Math.random()*0.4+0.2,
+  r:Math.random()*1.8+0.8
 }));
 
 function drawParticles(){
@@ -128,16 +129,16 @@ function drawParticles(){
     ctx.fill();
 
     p.y += p.v;
-    p.x += Math.sin(p.y*0.01)*0.4;
+    p.x += Math.sin(p.y*0.01)*0.3;
 
-    if(p.y>H){
-      p.y=0;
-      p.x=Math.random()*W;
+    if(p.y > H){
+      p.y = 0;
+      p.x = Math.random()*W;
     }
   }
 }
 
-// 💖 corazón completo (SIN simplificar)
+// 💖 corazón (MISMO pero más pequeño en escala)
 function heart(t){
   return {
     x:16*Math.pow(Math.sin(t),3),
@@ -145,11 +146,10 @@ function heart(t){
   };
 }
 
-// 💖 loop cinematográfico fluido
 function draw(){
   requestAnimationFrame(draw);
 
-  // 🖤 fondo negro real (aura intacta)
+  // 🖤 fondo fijo
   ctx.fillStyle="#000";
   ctx.fillRect(0,0,W,H);
 
@@ -159,17 +159,18 @@ function draw(){
 
   drawParticles();
 
-  const scale = Math.min(W,H)/24;
+  // 💡 CORAZÓN MÁS PEQUEÑO (CLAVE PARA MÓVIL)
+  const scale = Math.min(W,H)/35;
 
-  // 🎬 ESCENA 1 (corazón vivo completo)
+  // 🎬 ESCENA 1
   if(step === 1){
 
     ctx.textAlign="center";
     ctx.textBaseline="middle";
-    ctx.font="bold 14px Arial";
+    ctx.font="bold 12px Arial";
 
-    for(let i=0;i<180;i++){
-      const t = (i/180)*Math.PI*2 + time*0.3;
+    for(let i=0;i<140;i++){
+      const t = (i/140)*Math.PI*2 + time*0.3;
       const p = heart(t);
 
       const x = cx + p.x*scale;
@@ -178,20 +179,20 @@ function draw(){
       ctx.save();
       ctx.translate(x,y);
 
-      ctx.shadowBlur=15;
+      ctx.shadowBlur=12;
       ctx.shadowColor="#ff4da6";
       ctx.fillStyle="#ffb6d9";
 
-      ctx.fillText("I love you 💖",0,0);
+      ctx.fillText("💖",0,0);
 
       ctx.restore();
     }
   }
 
-  // 🎬 ESCENA 2 (revelación romántica completa)
+  // 🎬 ESCENA 2
   if(step === 2){
 
-    const size = Math.min(W,H)*0.2;
+    const size = Math.min(W,H)*0.18; // más pequeño también
 
     ctx.save();
     ctx.beginPath();
@@ -201,20 +202,12 @@ function draw(){
     ctx.drawImage(img, cx-size, cy-size, size*2, size*2);
     ctx.restore();
 
-    // aura glow fuerte (esto recupera el “wow”)
     ctx.beginPath();
     ctx.arc(cx,cy,size,0,Math.PI*2);
-    ctx.shadowBlur=40;
+    ctx.shadowBlur=30;
     ctx.shadowColor="#ff4da6";
     ctx.strokeStyle="#ff4da6";
-    ctx.lineWidth=2;
     ctx.stroke();
-
-    // pulso romántico
-    ctx.fillStyle="rgba(255,77,166,0.08)";
-    ctx.beginPath();
-    ctx.arc(cx,cy,size+20+Math.sin(time*6)*10,0,Math.PI*2);
-    ctx.fill();
   }
 }
 
