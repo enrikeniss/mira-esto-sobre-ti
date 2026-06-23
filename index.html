@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <title>Para Ti 💖</title>
 
 <style>
@@ -10,92 +10,62 @@ html,body{
   margin:0;
   height:100%;
   overflow:hidden;
-  background:black;
+  background:#000;
   font-family: Arial, sans-serif;
 }
 
-/* CANVAS */
+/* canvas full cinematic */
 canvas{
-  display:block;
-}
-
-/* INTRO */
-#intro{
   position:absolute;
   width:100%;
   height:100%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  flex-direction:column;
-  color:white;
-  text-align:center;
-  background:black;
-  transition:2s;
 }
 
-#name{
-  font-size:32px;
+/* texto inicial */
+#msg{
+  position:absolute;
+  width:100%;
+  text-align:center;
+  top:38%;
+  color:white;
+  font-size:6vw;
   text-shadow:0 0 25px #ff4da6;
 }
 
-#loading{
-  margin-top:20px;
-  font-size:14px;
-  opacity:0.7;
-}
-
-/* BOTÓN */
+/* botón romántico */
 #btn{
   position:absolute;
   left:50%;
-  top:60%;
+  top:58%;
   transform:translateX(-50%);
-  padding:14px 26px;
-  font-size:18px;
+  padding:14px 22px;
+  font-size:4.5vw;
   border:none;
   border-radius:30px;
   background:#ff4da6;
   color:white;
-  cursor:pointer;
-  box-shadow:0 0 30px #ff4da6;
-  display:none;
+  box-shadow:0 0 25px #ff4da6;
 }
 
-/* TEXTO FINAL */
+/* final text */
 #finalText{
   position:absolute;
   width:100%;
   text-align:center;
   bottom:10%;
   color:white;
-  font-size:20px;
-  text-shadow:0 0 20px #ff4da6;
+  font-size:4.5vw;
   display:none;
-}
-
-/* FADE */
-#fade{
-  position:absolute;
-  width:100%;
-  height:100%;
-  background:black;
-  opacity:1;
-  pointer-events:none;
+  text-shadow:0 0 20px #ff4da6;
 }
 </style>
 </head>
 
 <body>
 
-<div id="intro">
-  <div id="name">Cargando recuerdos contigo...</div>
-  <div id="loading">█▒▒▒▒▒▒▒▒▒ 10%</div>
-</div>
-
-<button id="btn">Ver el mensaje final 💖</button>
-<div id="finalText">Si tuviera que elegir otra vez… te volvería a elegir a ti 💖</div>
-<div id="fade"></div>
+<div id="msg">Te pienso más de lo que debería 💖</div>
+<button id="btn">¿Quieres saber por qué?</button>
+<div id="finalText">Porque desde que llegaste… todo cambió 💖</div>
 
 <canvas id="c"></canvas>
 
@@ -107,67 +77,67 @@ canvas{
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 
+let W,H;
+
 function resize(){
-  canvas.width = innerWidth;
-  canvas.height = innerHeight;
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = W;
+  canvas.height = H;
 }
 resize();
 addEventListener("resize", resize);
 
-// 💖 imagen
+// 💖 imagen central
 const img = new Image();
 img.src = "foto2.jpg";
 
-// UI
-const intro = document.getElementById("intro");
-const loading = document.getElementById("loading");
+// 💖 estado
+let step = 1;
+
+// 💖 UI
 const btn = document.getElementById("btn");
+const msg = document.getElementById("msg");
 const finalText = document.getElementById("finalText");
-const fade = document.getElementById("fade");
 const music = document.getElementById("music");
 
-// estado
-let step = 0;
-
-// 🔥 carga estilo película
-let progress = 10;
-const loader = setInterval(()=>{
-  progress += 10;
-  loading.innerText = "█".repeat(progress/10) + "▒".repeat(10-progress/10) + " " + progress + "%";
-
-  if(progress >= 100){
-    clearInterval(loader);
-
-    setTimeout(()=>{
-      intro.style.opacity = 0;
-
-      setTimeout(()=>{
-        intro.style.display = "none";
-        btn.style.display = "block";
-        step = 1;
-      },2000);
-
-    },800);
-  }
-},400);
-
-// 💖 botón final
 btn.onclick = () => {
-
   music.play();
-
-  fade.style.transition = "2s";
-  fade.style.opacity = "0.5";
-
-  setTimeout(()=>{
-    btn.style.display = "none";
-    finalText.style.display = "block";
-    fade.style.opacity = "0";
-    step = 2;
-  },1500);
+  step = 2;
+  msg.style.opacity = 0;
+  btn.style.opacity = 0;
+  finalText.style.display = "block";
 };
 
-// 💖 corazón matemático
+// 💖 partículas (aura romántica real)
+const particles = Array.from({length:60},()=>({
+  x:Math.random()*W,
+  y:Math.random()*H,
+  r:Math.random()*2+1,
+  v:Math.random()*0.5+0.2
+}));
+
+function drawParticles(){
+  ctx.fillStyle="rgba(255,77,166,0.6)";
+
+  for(let p of particles){
+    ctx.beginPath();
+    ctx.shadowBlur=10;
+    ctx.shadowColor="#ff4da6";
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fill();
+
+    p.y += p.v;
+    p.x += Math.sin(p.y*0.01)*0.4;
+
+    if(p.y>H){
+      p.y=0;
+      p.x=Math.random()*W;
+    }
+  }
+}
+
+// 💖 corazón completo (SIN simplificar)
 function heart(t){
   return {
     x:16*Math.pow(Math.sin(t),3),
@@ -175,53 +145,31 @@ function heart(t){
   };
 }
 
-// 💖 partículas
-const particles = Array.from({length:90},()=>({
-  x:Math.random()*innerWidth,
-  y:Math.random()*innerHeight,
-  v:Math.random()*1+0.3
-}));
-
-function drawParticles(){
-  ctx.fillStyle="rgba(255,77,166,0.5)";
-  particles.forEach(p=>{
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,2,0,Math.PI*2);
-    ctx.fill();
-
-    p.y += p.v;
-    p.x += Math.sin(p.y*0.01);
-
-    if(p.y>innerHeight){
-      p.y=0;
-      p.x=Math.random()*innerWidth;
-    }
-  });
-}
-
-// 💖 animación
+// 💖 loop cinematográfico fluido
 function draw(){
   requestAnimationFrame(draw);
 
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // 🖤 fondo negro real (aura intacta)
+  ctx.fillStyle="#000";
+  ctx.fillRect(0,0,W,H);
 
-  const cx = canvas.width/2;
-  const cy = canvas.height/2;
-  const time = Date.now()*0.001;
+  const cx = W/2;
+  const cy = H/2;
+  const time = performance.now()*0.001;
 
   drawParticles();
 
-  const scale = 22 + Math.sin(time*2)*2;
+  const scale = Math.min(W,H)/24;
 
-  // 🎬 ESCENA 1: corazón vivo
+  // 🎬 ESCENA 1 (corazón vivo completo)
   if(step === 1){
 
     ctx.textAlign="center";
     ctx.textBaseline="middle";
-    ctx.font="bold 16px Arial";
+    ctx.font="bold 14px Arial";
 
-    for(let i=0;i<240;i++){
-      const t = (i/240)*Math.PI*2 + time*0.3;
+    for(let i=0;i<180;i++){
+      const t = (i/180)*Math.PI*2 + time*0.3;
       const p = heart(t);
 
       const x = cx + p.x*scale;
@@ -229,23 +177,22 @@ function draw(){
 
       ctx.save();
       ctx.translate(x,y);
-      ctx.rotate(t);
 
-      ctx.fillStyle="#ffb6d9";
-      ctx.shadowBlur=20;
+      ctx.shadowBlur=15;
       ctx.shadowColor="#ff4da6";
+      ctx.fillStyle="#ffb6d9";
+
       ctx.fillText("I love you 💖",0,0);
 
       ctx.restore();
     }
   }
 
-  // 🎬 ESCENA 2: REVELACIÓN FINAL
+  // 🎬 ESCENA 2 (revelación romántica completa)
   if(step === 2){
 
-    const size = 170 + Math.sin(time*2)*6;
+    const size = Math.min(W,H)*0.2;
 
-    // imagen central
     ctx.save();
     ctx.beginPath();
     ctx.arc(cx,cy,size,0,Math.PI*2);
@@ -254,18 +201,19 @@ function draw(){
     ctx.drawImage(img, cx-size, cy-size, size*2, size*2);
     ctx.restore();
 
-    // glow
+    // aura glow fuerte (esto recupera el “wow”)
     ctx.beginPath();
     ctx.arc(cx,cy,size,0,Math.PI*2);
-    ctx.strokeStyle="#ff4da6";
     ctx.shadowBlur=40;
     ctx.shadowColor="#ff4da6";
+    ctx.strokeStyle="#ff4da6";
+    ctx.lineWidth=2;
     ctx.stroke();
 
-    // latido final
+    // pulso romántico
     ctx.fillStyle="rgba(255,77,166,0.08)";
     ctx.beginPath();
-    ctx.arc(cx,cy,size+30+Math.sin(time*6)*12,0,Math.PI*2);
+    ctx.arc(cx,cy,size+20+Math.sin(time*6)*10,0,Math.PI*2);
     ctx.fill();
   }
 }
