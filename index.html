@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Para Ti 💖</title>
 
 <style>
@@ -10,68 +10,50 @@ html,body{
   margin:0;
   height:100%;
   overflow:hidden;
-  background: radial-gradient(circle at center,#1a001f,#000);
+  background:#000;
+  touch-action: manipulation;
   font-family: Arial, sans-serif;
 }
 
-/* canvas */
 canvas{
   display:block;
+  width:100vw;
+  height:100vh;
 }
 
-/* escena inicial */
 #msg{
   position:absolute;
   width:100%;
   text-align:center;
-  top:38%;
+  top:35%;
   color:white;
-  font-size:30px;
-  font-weight:bold;
-  text-shadow:0 0 25px #ff4da6;
+  font-size:6vw;
+  text-shadow:0 0 15px #ff4da6;
 }
 
-/* botón */
 #btn{
   position:absolute;
   left:50%;
   top:58%;
   transform:translateX(-50%);
-  padding:14px 24px;
-  font-size:18px;
+  padding:12px 20px;
+  font-size:4.5vw;
   border:none;
   border-radius:25px;
   background:#ff4da6;
   color:white;
-  cursor:pointer;
-  box-shadow:0 0 25px #ff4da6;
-  transition:0.3s;
+  box-shadow:0 0 15px #ff4da6;
 }
 
-#btn:hover{
-  transform:translateX(-50%) scale(1.1);
-}
-
-/* texto final */
 #finalText{
   position:absolute;
   width:100%;
   text-align:center;
-  top:78%;
+  bottom:10%;
   color:white;
-  font-size:22px;
-  text-shadow:0 0 20px #ff4da6;
+  font-size:4.5vw;
   display:none;
-}
-
-/* overlay cinematic */
-#fade{
-  position:absolute;
-  width:100%;
-  height:100%;
-  background:black;
-  opacity:0;
-  pointer-events:none;
+  text-shadow:0 0 15px #ff4da6;
 }
 </style>
 </head>
@@ -81,7 +63,6 @@ canvas{
 <div id="msg">Te pienso más de lo que debería 💖</div>
 <button id="btn">¿Quieres saber por qué?</button>
 <div id="finalText">Porque desde que llegaste… todo cambió 💖</div>
-<div id="fade"></div>
 
 <canvas id="c"></canvas>
 
@@ -93,107 +74,107 @@ canvas{
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 
+let W,H,DPR;
+
+// 📱 optimización real para móvil
 function resize(){
-  canvas.width = innerWidth;
-  canvas.height = innerHeight;
+  DPR = Math.min(window.devicePixelRatio || 1, 2); // limita a 2 para evitar lag
+  W = window.innerWidth;
+  H = window.innerHeight;
+
+  canvas.width = W * DPR;
+  canvas.height = H * DPR;
+
+  canvas.style.width = W + "px";
+  canvas.style.height = H + "px";
+
+  ctx.setTransform(DPR,0,0,DPR,0,0);
 }
 resize();
-addEventListener("resize", resize);
-
-// 💖 imágenes
-const img = new Image();
-img.src = "foto2.jpg";
+window.addEventListener("resize", resize);
 
 // 💖 estado
 let step = 1;
 
-// 💖 elementos UI
-const btn = document.getElementById("btn");
-const msg = document.getElementById("msg");
-const finalText = document.getElementById("finalText");
-const fade = document.getElementById("fade");
-const music = document.getElementById("music");
+// 📷 imagen optimizada
+const img = new Image();
+img.src = "foto2.jpg";
 
-// ❤️ partículas (lluvia de corazones)
-const hearts = [];
-for(let i=0;i<80;i++){
-  hearts.push({
-    x:Math.random()*innerWidth,
-    y:Math.random()*innerHeight,
-    s:Math.random()*2+1,
-    v:Math.random()*1+0.5
-  });
-}
+// ❤️ MENOS partículas = más fluido
+const hearts = Array.from({length:35},()=>({
+  x:Math.random()*W,
+  y:Math.random()*H,
+  v:Math.random()*0.6+0.2
+}));
 
-// 💖 corazón matemático
+// 💖 corazón matemático (ligeramente simplificado)
 function heart(t){
   return {
     x:16*Math.pow(Math.sin(t),3),
-    y:-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))
+    y:-(13*Math.cos(t)-5*Math.cos(2*t)-Math.cos(3*t))
   };
 }
 
-// ✨ click principal
+// 🎯 botón
+const btn = document.getElementById("btn");
+const msg = document.getElementById("msg");
+const finalText = document.getElementById("finalText");
+const music = document.getElementById("music");
+
 btn.onclick = () => {
-
-  // música
   music.play();
-
-  // fade cinematográfico
-  fade.style.transition = "1.5s";
-  fade.style.opacity = "0.6";
-
-  setTimeout(()=>{
-    step = 2;
-    msg.style.display="none";
-    btn.style.display="none";
-    finalText.style.display="block";
-
-    fade.style.opacity = "0";
-  },1200);
+  step = 2;
+  msg.style.display="none";
+  btn.style.display="none";
+  finalText.style.display="block";
 };
 
-// 💖 lluvia de corazones
-function drawHearts(){
-  ctx.fillStyle="rgba(255,77,166,0.7)";
-  for(let h of hearts){
+// ✨ partículas (ULTRA ligeras)
+function drawParticles(){
+  ctx.fillStyle="rgba(255,77,166,0.6)";
+
+  for(let i=0;i<hearts.length;i++){
+    let p = hearts[i];
+
     ctx.beginPath();
-    ctx.arc(h.x,h.y,h.s,0,Math.PI*2);
+    ctx.arc(p.x,p.y,1.5,0,Math.PI*2);
     ctx.fill();
 
-    h.y += h.v;
-    h.x += Math.sin(h.y*0.01);
+    p.y += p.v;
+    p.x += Math.sin(p.y*0.01)*0.3;
 
-    if(h.y>innerHeight){
-      h.y=0;
-      h.x=Math.random()*innerWidth;
+    if(p.y > H){
+      p.y = 0;
+      p.x = Math.random()*W;
     }
   }
 }
 
-// 💖 animación principal
+// 💖 loop optimizado (requestAnimationFrame limpio)
 function draw(){
   requestAnimationFrame(draw);
 
-  const time = Date.now()*0.001;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // 🖤 fondo fijo (más rápido que clearRect en móviles viejos)
+  ctx.fillStyle="#000";
+  ctx.fillRect(0,0,W,H);
 
-  const cx = canvas.width/2;
-  const cy = canvas.height/2;
+  const cx = W/2;
+  const cy = H/2;
+  const time = performance.now()*0.001;
 
-  drawHearts();
+  drawParticles();
 
-  const scale = 22 + Math.sin(time*2)*2;
+  const scale = Math.min(W,H)/25;
 
-  // 🎬 ESCENA 1: texto flotante en corazón
+  // 💖 ESCENA 1
   if(step === 1){
 
     ctx.textAlign="center";
     ctx.textBaseline="middle";
-    ctx.font="bold 16px Arial";
+    ctx.font = "bold 12px Arial";
 
-    for(let i=0;i<220;i++){
-      const t = (i/220)*Math.PI*2 + time*0.3;
+    for(let i=0;i<120;i++){ // reducido para fluidez
+      const t = (i/120)*Math.PI*2 + time*0.3;
       const p = heart(t);
 
       const x = cx + p.x*scale;
@@ -201,22 +182,21 @@ function draw(){
 
       ctx.save();
       ctx.translate(x,y);
-      ctx.rotate(t);
 
       ctx.fillStyle="#ffb6d9";
-      ctx.shadowBlur=18;
+      ctx.shadowBlur=10;
       ctx.shadowColor="#ff4da6";
-      ctx.fillText("I love you 💖",0,0);
+
+      ctx.fillText("💖",0,0);
 
       ctx.restore();
     }
   }
 
-  // 🎬 ESCENA 2: REVELACIÓN CINEMATICA
+  // 💖 ESCENA 2
   if(step === 2){
 
-    // zoom suave
-    const size = 160 + Math.sin(time*2)*5;
+    const size = Math.min(W,H)*0.18;
 
     ctx.save();
     ctx.beginPath();
@@ -226,19 +206,11 @@ function draw(){
     ctx.drawImage(img, cx-size, cy-size, size*2, size*2);
     ctx.restore();
 
-    // borde glow
+    ctx.strokeStyle="#ff4da6";
+    ctx.lineWidth=2;
     ctx.beginPath();
     ctx.arc(cx,cy,size,0,Math.PI*2);
-    ctx.strokeStyle="#ff4da6";
-    ctx.shadowBlur=30;
-    ctx.shadowColor="#ff4da6";
     ctx.stroke();
-
-    // latido del corazón (overlay suave)
-    ctx.fillStyle="rgba(255,77,166,0.08)";
-    ctx.beginPath();
-    ctx.arc(cx,cy,size+20+Math.sin(time*6)*10,0,Math.PI*2);
-    ctx.fill();
   }
 }
 
