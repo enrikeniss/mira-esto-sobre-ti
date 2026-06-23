@@ -1,60 +1,93 @@
-<body>
-
-<div id="msg">Te pienso más de lo que debería 💖</div>
-
-<button id="btn">¿Quieres saber por qué?</button>
-
-<canvas id="c"></canvas>
-
-<audio id="music" autoplay loop>
-  <source src="music.mp3" type="audio/mpeg">
-</audio>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Para Ti 💖</title>
 
 <style>
-#btn{
-  position:absolute;
-  left:50%;
-  top:60%;
-  transform:translateX(-50%);
-  padding:12px 20px;
-  font-size:18px;
-  border:none;
-  border-radius:20px;
-  background:#ff4da6;
-  color:white;
-  cursor:pointer;
-  box-shadow:0 0 20px #ff4da6;
-  transition:0.3s;
+html,body{
+  margin:0;
+  height:100%;
+  overflow:hidden;
+  background: radial-gradient(circle at center,#1a001f,#000);
+  font-family: Arial, sans-serif;
 }
 
-#btn:hover{
-  transform:translateX(-50%) scale(1.05);
+/* canvas */
+canvas{
+  display:block;
 }
 
+/* escena inicial */
 #msg{
   position:absolute;
   width:100%;
   text-align:center;
-  top:40%;
+  top:38%;
   color:white;
-  font-size:28px;
+  font-size:30px;
   font-weight:bold;
-  text-shadow:0 0 20px #ff4da6;
+  text-shadow:0 0 25px #ff4da6;
 }
 
+/* botón */
+#btn{
+  position:absolute;
+  left:50%;
+  top:58%;
+  transform:translateX(-50%);
+  padding:14px 24px;
+  font-size:18px;
+  border:none;
+  border-radius:25px;
+  background:#ff4da6;
+  color:white;
+  cursor:pointer;
+  box-shadow:0 0 25px #ff4da6;
+  transition:0.3s;
+}
+
+#btn:hover{
+  transform:translateX(-50%) scale(1.1);
+}
+
+/* texto final */
 #finalText{
   position:absolute;
   width:100%;
   text-align:center;
-  top:75%;
+  top:78%;
   color:white;
   font-size:22px;
-  text-shadow:0 0 15px #ff4da6;
+  text-shadow:0 0 20px #ff4da6;
   display:none;
 }
-</style>
 
-<div id="finalText">Porque desde que te vi… todo cambió 💖</div>
+/* overlay cinematic */
+#fade{
+  position:absolute;
+  width:100%;
+  height:100%;
+  background:black;
+  opacity:0;
+  pointer-events:none;
+}
+</style>
+</head>
+
+<body>
+
+<div id="msg">Te pienso más de lo que debería 💖</div>
+<button id="btn">¿Quieres saber por qué?</button>
+<div id="finalText">Porque desde que llegaste… todo cambió 💖</div>
+<div id="fade"></div>
+
+<canvas id="c"></canvas>
+
+<audio id="music" loop>
+  <source src="music.mp3" type="audio/mpeg">
+</audio>
 
 <script>
 const canvas = document.getElementById("c");
@@ -67,26 +100,32 @@ function resize(){
 resize();
 addEventListener("resize", resize);
 
-// 💖 estado
-let step = 1;
-
-// ❤️ imagen central
+// 💖 imágenes
 const img = new Image();
 img.src = "foto2.jpg";
 
-// ✨ botón
+// 💖 estado
+let step = 1;
+
+// 💖 elementos UI
 const btn = document.getElementById("btn");
 const msg = document.getElementById("msg");
 const finalText = document.getElementById("finalText");
+const fade = document.getElementById("fade");
+const music = document.getElementById("music");
 
-btn.onclick = () => {
-  step = 2;
-  btn.style.display = "none";
-  msg.style.display = "none";
-  finalText.style.display = "block";
-};
+// ❤️ partículas (lluvia de corazones)
+const hearts = [];
+for(let i=0;i<80;i++){
+  hearts.push({
+    x:Math.random()*innerWidth,
+    y:Math.random()*innerHeight,
+    s:Math.random()*2+1,
+    v:Math.random()*1+0.5
+  });
+}
 
-// 💖 corazón
+// 💖 corazón matemático
 function heart(t){
   return {
     x:16*Math.pow(Math.sin(t),3),
@@ -94,6 +133,45 @@ function heart(t){
   };
 }
 
+// ✨ click principal
+btn.onclick = () => {
+
+  // música
+  music.play();
+
+  // fade cinematográfico
+  fade.style.transition = "1.5s";
+  fade.style.opacity = "0.6";
+
+  setTimeout(()=>{
+    step = 2;
+    msg.style.display="none";
+    btn.style.display="none";
+    finalText.style.display="block";
+
+    fade.style.opacity = "0";
+  },1200);
+};
+
+// 💖 lluvia de corazones
+function drawHearts(){
+  ctx.fillStyle="rgba(255,77,166,0.7)";
+  for(let h of hearts){
+    ctx.beginPath();
+    ctx.arc(h.x,h.y,h.s,0,Math.PI*2);
+    ctx.fill();
+
+    h.y += h.v;
+    h.x += Math.sin(h.y*0.01);
+
+    if(h.y>innerHeight){
+      h.y=0;
+      h.x=Math.random()*innerWidth;
+    }
+  }
+}
+
+// 💖 animación principal
 function draw(){
   requestAnimationFrame(draw);
 
@@ -103,17 +181,19 @@ function draw(){
   const cx = canvas.width/2;
   const cy = canvas.height/2;
 
-  const scale = 20 + Math.sin(time*2)*2;
+  drawHearts();
 
-  // 💖 FASE 1: solo animación
+  const scale = 22 + Math.sin(time*2)*2;
+
+  // 🎬 ESCENA 1: texto flotante en corazón
   if(step === 1){
 
     ctx.textAlign="center";
     ctx.textBaseline="middle";
     ctx.font="bold 16px Arial";
 
-    for(let i=0;i<200;i++){
-      const t = (i/200)*Math.PI*2 + time*0.3;
+    for(let i=0;i<220;i++){
+      const t = (i/220)*Math.PI*2 + time*0.3;
       const p = heart(t);
 
       const x = cx + p.x*scale;
@@ -124,7 +204,7 @@ function draw(){
       ctx.rotate(t);
 
       ctx.fillStyle="#ffb6d9";
-      ctx.shadowBlur=15;
+      ctx.shadowBlur=18;
       ctx.shadowColor="#ff4da6";
       ctx.fillText("I love you 💖",0,0);
 
@@ -132,10 +212,11 @@ function draw(){
     }
   }
 
-  // 💖 FASE 2: aparece foto en el corazón
+  // 🎬 ESCENA 2: REVELACIÓN CINEMATICA
   if(step === 2){
 
-    const size = 140;
+    // zoom suave
+    const size = 160 + Math.sin(time*2)*5;
 
     ctx.save();
     ctx.beginPath();
@@ -149,9 +230,15 @@ function draw(){
     ctx.beginPath();
     ctx.arc(cx,cy,size,0,Math.PI*2);
     ctx.strokeStyle="#ff4da6";
-    ctx.shadowBlur=20;
+    ctx.shadowBlur=30;
     ctx.shadowColor="#ff4da6";
     ctx.stroke();
+
+    // latido del corazón (overlay suave)
+    ctx.fillStyle="rgba(255,77,166,0.08)";
+    ctx.beginPath();
+    ctx.arc(cx,cy,size+20+Math.sin(time*6)*10,0,Math.PI*2);
+    ctx.fill();
   }
 }
 
@@ -159,3 +246,4 @@ draw();
 </script>
 
 </body>
+</html>
