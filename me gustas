@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Para Ti ❤️</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#000;
+    overflow:hidden;
+    font-family:'Segoe UI',sans-serif;
+}
+
+canvas{
+    position:fixed;
+    inset:0;
+}
+
+.center-text{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    text-align:center;
+    z-index:10;
+    pointer-events:none;
+}
+
+.center-text h1{
+    color:white;
+    font-size:clamp(2rem,6vw,4rem);
+    text-shadow:
+        0 0 10px #fff,
+        0 0 20px #ff7eb8,
+        0 0 40px #ff7eb8;
+}
+
+.center-text p{
+    margin-top:10px;
+    color:#ffd6e7;
+    font-size:clamp(1rem,2vw,1.3rem);
+}
+
+</style>
+</head>
+<body>
+
+<div class="center-text">
+    <h1>❤️ Para Ti ❤️</h1>
+    <p>Eres mi lugar favorito.</p>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<script>
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+function resize(){
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+}
+resize();
+addEventListener("resize", resize);
+
+const words = [];
+const total = 320;
+
+for(let i=0;i<total;i++){
+    words.push({
+        angle:(i/total)*Math.PI*2
+    });
+}
+
+const particles = [];
+
+for(let i=0;i<80;i++){
+    particles.push({
+        x:Math.random()*innerWidth,
+        y:Math.random()*innerHeight,
+        r:Math.random()*3+1,
+        speed:Math.random()*0.6+0.2
+    });
+}
+
+function heart(t){
+
+    return {
+        x:16*Math.pow(Math.sin(t),3),
+        y:-(13*Math.cos(t)
+            -5*Math.cos(2*t)
+            -2*Math.cos(3*t)
+            -Math.cos(4*t))
+    };
+
+}
+
+function animate(){
+
+    requestAnimationFrame(animate);
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    particles.forEach(p=>{
+
+        p.y -= p.speed;
+
+        if(p.y < -10){
+            p.y = canvas.height + 10;
+            p.x = Math.random()*canvas.width;
+        }
+
+        ctx.beginPath();
+        ctx.fillStyle="rgba(255,170,200,.5)";
+        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fill();
+    });
+
+    const time = Date.now()*0.001;
+
+    const pulse = 18 + Math.sin(time*2.5)*2.5;
+
+    const cx = canvas.width/2;
+    const cy = canvas.height/2;
+
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.font="bold 18px Arial";
+
+    words.forEach((w,index)=>{
+
+        const t = w.angle + time*0.22;
+
+        const p = heart(t);
+
+        const x = cx + p.x*pulse;
+        const y = cy + p.y*pulse;
+
+        ctx.save();
+
+        ctx.translate(x,y);
+        ctx.rotate(t);
+
+        ctx.shadowColor="#ff80bf";
+        ctx.shadowBlur=25;
+
+        ctx.fillStyle="#ffd0e5";
+
+        ctx.fillText("I love you",0,0);
+
+        ctx.restore();
+
+    });
+
+}
+
+animate();
+
+</script>
+
+</body>
+</html>
