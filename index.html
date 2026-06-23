@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <title>Para Ti 💖</title>
 
@@ -11,17 +11,17 @@ html,body{
   height:100%;
   overflow:hidden;
   background:#000;
-  font-family: Arial, sans-serif;
+  font-family:Arial;
 }
 
-/* CANVAS */
+/* canvas */
 canvas{
   position:absolute;
   width:100%;
   height:100%;
 }
 
-/* TEXTO INICIAL */
+/* texto inicial */
 #msg{
   position:absolute;
   width:100%;
@@ -32,23 +32,28 @@ canvas{
   text-shadow:0 0 20px #ff4da6;
 }
 
-/* BOTÓN (AHORA SI SIEMPRE VISIBLE) */
+/* botón desde inicio */
 #btn{
   position:absolute;
   left:50%;
   top:55%;
   transform:translateX(-50%);
-  padding:12px 18px;
+  padding:14px 22px;
   font-size:4.5vw;
   border:none;
-  border-radius:30px;
+  border-radius:40px;
   background:#ff4da6;
   color:white;
-  box-shadow:0 0 20px #ff4da6;
-  cursor:pointer;
+  box-shadow:0 0 25px #ff4da6;
+  animation:beat 1.3s infinite;
 }
 
-/* TEXTO FINAL */
+@keyframes beat{
+  0%,100%{transform:translateX(-50%) scale(1);}
+  50%{transform:translateX(-50%) scale(1.08);}
+}
+
+/* mensaje final */
 #finalText{
   position:absolute;
   width:100%;
@@ -64,15 +69,15 @@ canvas{
 
 <body>
 
-<div id="msg">Te pienso más de lo que debería 💖</div>
+<div id="msg">No dejo de pensar en ti 💖</div>
 <button id="btn">¿Quieres saber por qué?</button>
 <div id="finalText">Porque desde que llegaste… todo cambió 💖</div>
-
-<canvas id="c"></canvas>
 
 <audio id="music" loop>
   <source src="music.mp3" type="audio/mpeg">
 </audio>
+
+<canvas id="c"></canvas>
 
 <script>
 const canvas = document.getElementById("c");
@@ -81,8 +86,8 @@ const ctx = canvas.getContext("2d");
 let W,H;
 
 function resize(){
-  W = window.innerWidth;
-  H = window.innerHeight;
+  W = innerWidth;
+  H = innerHeight;
   canvas.width = W;
   canvas.height = H;
 }
@@ -96,49 +101,31 @@ img.src = "foto2.jpg";
 // 💖 estado
 let step = 1;
 
-// 💖 UI
+// UI
 const btn = document.getElementById("btn");
 const msg = document.getElementById("msg");
 const finalText = document.getElementById("finalText");
 const music = document.getElementById("music");
 
+// 💖 botón click
 btn.onclick = () => {
+
   music.play();
-  step = 2;
-  msg.style.display = "none";
-  btn.style.display = "none";
-  finalText.style.display = "block";
+
+  msg.style.transition="1s";
+  msg.style.opacity=0;
+  btn.style.transition="1s";
+  btn.style.opacity=0;
+
+  setTimeout(()=>{
+    msg.style.display="none";
+    btn.style.display="none";
+    finalText.style.display="block";
+    step = 2;
+  },1000);
 };
 
-// 💖 partículas suaves (ligeras)
-const particles = Array.from({length:45},()=>({
-  x:Math.random()*W,
-  y:Math.random()*H,
-  v:Math.random()*0.4+0.2,
-  r:Math.random()*1.8+0.8
-}));
-
-function drawParticles(){
-  ctx.fillStyle="rgba(255,77,166,0.6)";
-
-  for(let p of particles){
-    ctx.beginPath();
-    ctx.shadowBlur=10;
-    ctx.shadowColor="#ff4da6";
-    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx.fill();
-
-    p.y += p.v;
-    p.x += Math.sin(p.y*0.01)*0.3;
-
-    if(p.y > H){
-      p.y = 0;
-      p.x = Math.random()*W;
-    }
-  }
-}
-
-// 💖 corazón (MISMO pero más pequeño en escala)
+// 💖 corazón
 function heart(t){
   return {
     x:16*Math.pow(Math.sin(t),3),
@@ -146,10 +133,35 @@ function heart(t){
   };
 }
 
+// 💖 partículas suaves
+const particles = Array.from({length:55},()=>({
+  x:Math.random()*W,
+  y:Math.random()*H,
+  v:Math.random()*0.5+0.2
+}));
+
+function drawParticles(){
+  ctx.fillStyle="rgba(255,77,166,0.6)";
+
+  for(let p of particles){
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,1.5,0,Math.PI*2);
+    ctx.fill();
+
+    p.y += p.v;
+    p.x += Math.sin(p.y*0.01)*0.3;
+
+    if(p.y>H){
+      p.y=0;
+      p.x=Math.random()*W;
+    }
+  }
+}
+
+// 💖 loop
 function draw(){
   requestAnimationFrame(draw);
 
-  // 🖤 fondo fijo
   ctx.fillStyle="#000";
   ctx.fillRect(0,0,W,H);
 
@@ -159,29 +171,28 @@ function draw(){
 
   drawParticles();
 
-  // 💡 CORAZÓN MÁS PEQUEÑO (CLAVE PARA MÓVIL)
-  const scale = Math.min(W,H)/35;
+  const scale = Math.min(W,H)/28;
 
-  // 🎬 ESCENA 1
+  // 💖 ESCENA 1: corazón vivo desde inicio
   if(step === 1){
 
     ctx.textAlign="center";
     ctx.textBaseline="middle";
-    ctx.font="bold 12px Arial";
+    ctx.font="bold 14px Arial";
 
-    for(let i=0;i<140;i++){
-      const t = (i/140)*Math.PI*2 + time*0.3;
-      const p = heart(t);
+    for(let i=0;i<160;i++){
+      const t = (i/160)*Math.PI*2 + time*0.3;
+      const h = heart(t);
 
-      const x = cx + p.x*scale;
-      const y = cy + p.y*scale;
+      const x = cx + h.x*scale;
+      const y = cy + h.y*scale;
 
       ctx.save();
       ctx.translate(x,y);
 
-      ctx.shadowBlur=12;
-      ctx.shadowColor="#ff4da6";
       ctx.fillStyle="#ffb6d9";
+      ctx.shadowBlur=15;
+      ctx.shadowColor="#ff4da6";
 
       ctx.fillText("💖",0,0);
 
@@ -189,25 +200,30 @@ function draw(){
     }
   }
 
-  // 🎬 ESCENA 2
+  // 💖 ESCENA 2: REVELACIÓN
   if(step === 2){
 
-    const size = Math.min(W,H)*0.18; // más pequeño también
+    const size = Math.min(W,H)*0.2;
 
     ctx.save();
     ctx.beginPath();
     ctx.arc(cx,cy,size,0,Math.PI*2);
     ctx.clip();
 
-    ctx.drawImage(img, cx-size, cy-size, size*2, size*2);
+    ctx.drawImage(img,cx-size,cy-size,size*2,size*2);
     ctx.restore();
 
     ctx.beginPath();
     ctx.arc(cx,cy,size,0,Math.PI*2);
-    ctx.shadowBlur=30;
-    ctx.shadowColor="#ff4da6";
     ctx.strokeStyle="#ff4da6";
+    ctx.shadowBlur=35;
+    ctx.shadowColor="#ff4da6";
     ctx.stroke();
+
+    ctx.fillStyle="rgba(255,77,166,0.08)";
+    ctx.beginPath();
+    ctx.arc(cx,cy,size+15+Math.sin(time*6)*10,0,Math.PI*2);
+    ctx.fill();
   }
 }
 
