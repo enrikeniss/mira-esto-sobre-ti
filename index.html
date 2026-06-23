@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Para Ti 💖</title>
 
 <style>
@@ -10,59 +10,92 @@ html,body{
   margin:0;
   height:100%;
   overflow:hidden;
-  background:#000;
-  touch-action: manipulation;
+  background:black;
   font-family: Arial, sans-serif;
 }
 
+/* CANVAS */
 canvas{
   display:block;
-  width:100vw;
-  height:100vh;
 }
 
-#msg{
+/* INTRO */
+#intro{
   position:absolute;
   width:100%;
-  text-align:center;
-  top:35%;
+  height:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
   color:white;
-  font-size:6vw;
-  text-shadow:0 0 15px #ff4da6;
+  text-align:center;
+  background:black;
+  transition:2s;
 }
 
+#name{
+  font-size:32px;
+  text-shadow:0 0 25px #ff4da6;
+}
+
+#loading{
+  margin-top:20px;
+  font-size:14px;
+  opacity:0.7;
+}
+
+/* BOTÓN */
 #btn{
   position:absolute;
   left:50%;
-  top:58%;
+  top:60%;
   transform:translateX(-50%);
-  padding:12px 20px;
-  font-size:4.5vw;
+  padding:14px 26px;
+  font-size:18px;
   border:none;
-  border-radius:25px;
+  border-radius:30px;
   background:#ff4da6;
   color:white;
-  box-shadow:0 0 15px #ff4da6;
+  cursor:pointer;
+  box-shadow:0 0 30px #ff4da6;
+  display:none;
 }
 
+/* TEXTO FINAL */
 #finalText{
   position:absolute;
   width:100%;
   text-align:center;
   bottom:10%;
   color:white;
-  font-size:4.5vw;
+  font-size:20px;
+  text-shadow:0 0 20px #ff4da6;
   display:none;
-  text-shadow:0 0 15px #ff4da6;
+}
+
+/* FADE */
+#fade{
+  position:absolute;
+  width:100%;
+  height:100%;
+  background:black;
+  opacity:1;
+  pointer-events:none;
 }
 </style>
 </head>
 
 <body>
 
-<div id="msg">Te pienso más de lo que debería 💖</div>
-<button id="btn">¿Quieres saber por qué?</button>
-<div id="finalText">Porque desde que llegaste… todo cambió 💖</div>
+<div id="intro">
+  <div id="name">Cargando recuerdos contigo...</div>
+  <div id="loading">█▒▒▒▒▒▒▒▒▒ 10%</div>
+</div>
+
+<button id="btn">Ver el mensaje final 💖</button>
+<div id="finalText">Si tuviera que elegir otra vez… te volvería a elegir a ti 💖</div>
+<div id="fade"></div>
 
 <canvas id="c"></canvas>
 
@@ -74,107 +107,121 @@ canvas{
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 
-let W,H,DPR;
-
-// 📱 optimización real para móvil
 function resize(){
-  DPR = Math.min(window.devicePixelRatio || 1, 2); // limita a 2 para evitar lag
-  W = window.innerWidth;
-  H = window.innerHeight;
-
-  canvas.width = W * DPR;
-  canvas.height = H * DPR;
-
-  canvas.style.width = W + "px";
-  canvas.style.height = H + "px";
-
-  ctx.setTransform(DPR,0,0,DPR,0,0);
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
 }
 resize();
-window.addEventListener("resize", resize);
+addEventListener("resize", resize);
 
-// 💖 estado
-let step = 1;
-
-// 📷 imagen optimizada
+// 💖 imagen
 const img = new Image();
 img.src = "foto2.jpg";
 
-// ❤️ MENOS partículas = más fluido
-const hearts = Array.from({length:35},()=>({
-  x:Math.random()*W,
-  y:Math.random()*H,
-  v:Math.random()*0.6+0.2
-}));
+// UI
+const intro = document.getElementById("intro");
+const loading = document.getElementById("loading");
+const btn = document.getElementById("btn");
+const finalText = document.getElementById("finalText");
+const fade = document.getElementById("fade");
+const music = document.getElementById("music");
 
-// 💖 corazón matemático (ligeramente simplificado)
+// estado
+let step = 0;
+
+// 🔥 carga estilo película
+let progress = 10;
+const loader = setInterval(()=>{
+  progress += 10;
+  loading.innerText = "█".repeat(progress/10) + "▒".repeat(10-progress/10) + " " + progress + "%";
+
+  if(progress >= 100){
+    clearInterval(loader);
+
+    setTimeout(()=>{
+      intro.style.opacity = 0;
+
+      setTimeout(()=>{
+        intro.style.display = "none";
+        btn.style.display = "block";
+        step = 1;
+      },2000);
+
+    },800);
+  }
+},400);
+
+// 💖 botón final
+btn.onclick = () => {
+
+  music.play();
+
+  fade.style.transition = "2s";
+  fade.style.opacity = "0.5";
+
+  setTimeout(()=>{
+    btn.style.display = "none";
+    finalText.style.display = "block";
+    fade.style.opacity = "0";
+    step = 2;
+  },1500);
+};
+
+// 💖 corazón matemático
 function heart(t){
   return {
     x:16*Math.pow(Math.sin(t),3),
-    y:-(13*Math.cos(t)-5*Math.cos(2*t)-Math.cos(3*t))
+    y:-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))
   };
 }
 
-// 🎯 botón
-const btn = document.getElementById("btn");
-const msg = document.getElementById("msg");
-const finalText = document.getElementById("finalText");
-const music = document.getElementById("music");
+// 💖 partículas
+const particles = Array.from({length:90},()=>({
+  x:Math.random()*innerWidth,
+  y:Math.random()*innerHeight,
+  v:Math.random()*1+0.3
+}));
 
-btn.onclick = () => {
-  music.play();
-  step = 2;
-  msg.style.display="none";
-  btn.style.display="none";
-  finalText.style.display="block";
-};
-
-// ✨ partículas (ULTRA ligeras)
 function drawParticles(){
-  ctx.fillStyle="rgba(255,77,166,0.6)";
-
-  for(let i=0;i<hearts.length;i++){
-    let p = hearts[i];
-
+  ctx.fillStyle="rgba(255,77,166,0.5)";
+  particles.forEach(p=>{
     ctx.beginPath();
-    ctx.arc(p.x,p.y,1.5,0,Math.PI*2);
+    ctx.arc(p.x,p.y,2,0,Math.PI*2);
     ctx.fill();
 
     p.y += p.v;
-    p.x += Math.sin(p.y*0.01)*0.3;
+    p.x += Math.sin(p.y*0.01);
 
-    if(p.y > H){
-      p.y = 0;
-      p.x = Math.random()*W;
+    if(p.y>innerHeight){
+      p.y=0;
+      p.x=Math.random()*innerWidth;
     }
-  }
+  });
 }
 
-// 💖 loop optimizado (requestAnimationFrame limpio)
+// 💖 animación
 function draw(){
   requestAnimationFrame(draw);
 
-  // 🖤 fondo fijo (más rápido que clearRect en móviles viejos)
-  ctx.fillStyle="#000";
-  ctx.fillRect(0,0,W,H);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  const cx = W/2;
-  const cy = H/2;
-  const time = performance.now()*0.001;
+  const cx = canvas.width/2;
+  const cy = canvas.height/2;
+  const time = Date.now()*0.001;
 
   drawParticles();
 
-  const scale = Math.min(W,H)/25;
+  const scale = 22 + Math.sin(time*2)*2;
 
-  // 💖 ESCENA 1
+  // 🎬 ESCENA 1: corazón vivo
   if(step === 1){
 
     ctx.textAlign="center";
     ctx.textBaseline="middle";
-    ctx.font = "bold 12px Arial";
+    ctx.font="bold 16px Arial";
 
-    for(let i=0;i<120;i++){ // reducido para fluidez
-      const t = (i/120)*Math.PI*2 + time*0.3;
+    for(let i=0;i<240;i++){
+      const t = (i/240)*Math.PI*2 + time*0.3;
       const p = heart(t);
 
       const x = cx + p.x*scale;
@@ -182,22 +229,23 @@ function draw(){
 
       ctx.save();
       ctx.translate(x,y);
+      ctx.rotate(t);
 
       ctx.fillStyle="#ffb6d9";
-      ctx.shadowBlur=10;
+      ctx.shadowBlur=20;
       ctx.shadowColor="#ff4da6";
-
-      ctx.fillText("💖",0,0);
+      ctx.fillText("I love you 💖",0,0);
 
       ctx.restore();
     }
   }
 
-  // 💖 ESCENA 2
+  // 🎬 ESCENA 2: REVELACIÓN FINAL
   if(step === 2){
 
-    const size = Math.min(W,H)*0.18;
+    const size = 170 + Math.sin(time*2)*6;
 
+    // imagen central
     ctx.save();
     ctx.beginPath();
     ctx.arc(cx,cy,size,0,Math.PI*2);
@@ -206,11 +254,19 @@ function draw(){
     ctx.drawImage(img, cx-size, cy-size, size*2, size*2);
     ctx.restore();
 
-    ctx.strokeStyle="#ff4da6";
-    ctx.lineWidth=2;
+    // glow
     ctx.beginPath();
     ctx.arc(cx,cy,size,0,Math.PI*2);
+    ctx.strokeStyle="#ff4da6";
+    ctx.shadowBlur=40;
+    ctx.shadowColor="#ff4da6";
     ctx.stroke();
+
+    // latido final
+    ctx.fillStyle="rgba(255,77,166,0.08)";
+    ctx.beginPath();
+    ctx.arc(cx,cy,size+30+Math.sin(time*6)*12,0,Math.PI*2);
+    ctx.fill();
   }
 }
 
